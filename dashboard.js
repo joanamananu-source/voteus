@@ -185,7 +185,8 @@
   const sidebar = document.querySelector('#sidebar'); const scrim = document.querySelector('#scrim'); const menuToggle = document.querySelector('#menuToggle');
   function closeNavigation() { sidebar.classList.remove('is-open'); scrim.classList.remove('is-open'); menuToggle.setAttribute('aria-expanded', 'false'); }
   menuToggle.addEventListener('click', () => { const open = sidebar.classList.toggle('is-open'); scrim.classList.toggle('is-open', open); menuToggle.setAttribute('aria-expanded', String(open)); });
-  scrim.addEventListener('click', closeNavigation); document.querySelectorAll('.side-nav a').forEach(link => link.addEventListener('click', closeNavigation));
+  scrim.addEventListener('click', closeNavigation);
+  document.querySelectorAll('.side-nav a').forEach(link => link.addEventListener('click', () => { document.querySelectorAll('.side-nav a').forEach(item => item.classList.remove('active')); link.classList.add('active'); closeNavigation(); }));
   paymentEnabled.addEventListener('change', syncPaymentInputs);
   syncWithdrawalFields();
   document.querySelector('#logout').addEventListener('click', async () => { try { await request('/api/auth/logout', { method: 'POST' }); } finally { localStorage.removeItem('voteusToken'); localStorage.removeItem('voteusUser'); window.location.href = 'index.html'; } });
