@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Voteus is a simple, trustworthy way to run voting events.">
+  <title>Voteus | Voting made simple</title>
+  <style>
+    :root { --ink:#102a43; --muted:#526b7b; --paper:#f6f8f7; --white:#fff; --green:#0a7b61; --lime:#d9f25d; --line:#d9e2e6; --coral:#f16e5b; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; color:var(--ink); background:var(--paper); font:16px/1.5 Arial, Helvetica, sans-serif; }
+    a { color:inherit; text-decoration:none; }
+    button { font:inherit; cursor:pointer; }
+    .wrap { width:min(1140px, calc(100% - 40px)); margin:auto; }
+    .nav { height:76px; display:flex; align-items:center; justify-content:space-between; gap:24px; }
+    .brand { display:inline-flex; align-items:center; gap:10px; font-size:24px; font-weight:800; letter-spacing:0; }
+    .mark { position:relative; width:30px; height:30px; border-radius:50% 50% 50% 7px; background:var(--green); transform:rotate(-45deg); }
+    .mark:after { content:""; position:absolute; inset:8px; border:3px solid var(--lime); border-top:0; border-left:0; transform:rotate(45deg); }
+    .links { display:flex; align-items:center; gap:28px; color:#365365; font-size:14px; font-weight:700; }
+    .links a:hover { color:var(--green); }
+    .button { display:inline-flex; align-items:center; justify-content:center; min-height:43px; padding:0 19px; border:1px solid transparent; border-radius:5px; background:var(--green); color:var(--white); font-weight:700; }
+    .button:hover { background:#07644f; }
+    .button.alt { background:transparent; border-color:var(--green); color:var(--green); }
+    .hero { min-height:550px; color:var(--white); background:linear-gradient(90deg, rgba(7,42,45,.92) 0%, rgba(7,42,45,.74) 45%, rgba(7,42,45,.27) 100%), url('justvote.me/frontend/images/main-slider/slider1/bg1.jpg') center/cover; }
+    .hero-content { padding:104px 0 92px; max-width:650px; }
+    .eyebrow { margin:0 0 15px; color:var(--lime); font-size:12px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; }
+    h1 { max-width:600px; margin:0; font-size:clamp(42px, 6vw, 68px); line-height:1.04; letter-spacing:0; }
+    .hero p { max-width:520px; margin:20px 0 30px; color:#e0ece8; font-size:18px; }
+    .actions { display:flex; flex-wrap:wrap; gap:12px; }
+    .button.light { background:var(--lime); color:#183d39; }
+    .button.light:hover { background:#c8e24a; }
+    .metrics { position:relative; z-index:1; margin-top:-37px; display:grid; grid-template-columns:repeat(3, 1fr); border-radius:7px; overflow:hidden; background:var(--white); box-shadow:0 12px 30px rgba(23,53,62,.14); }
+    .metric { padding:23px 28px; border-right:1px solid var(--line); }
+    .metric:last-child { border:0; }
+    .metric strong { display:block; color:var(--green); font-size:25px; }
+    .metric span { color:var(--muted); font-size:13px; font-weight:700; }
+    section { padding:86px 0; }
+    .section-head { display:flex; align-items:end; justify-content:space-between; gap:20px; margin-bottom:30px; }
+    h2 { margin:0; font-size:32px; line-height:1.15; letter-spacing:0; }
+    .section-head p { max-width:470px; margin:0; color:var(--muted); }
+    .events { display:grid; grid-template-columns:repeat(3, 1fr); gap:18px; }
+    .event { background:var(--white); border:1px solid var(--line); border-radius:6px; overflow:hidden; transition:transform .2s, box-shadow .2s; }
+    .event:hover { transform:translateY(-3px); box-shadow:0 10px 24px rgba(20,57,68,.12); }
+    .event-image { height:156px; display:flex; align-items:end; padding:17px; background:center/cover url('justvote.me/uploads/images/banners/1827141852087653.webp'), #155e57; }
+    .event:nth-child(2) .event-image { background-image:linear-gradient(125deg, #f16e5b, #e1b94b); }
+    .event:nth-child(3) .event-image { background-image:linear-gradient(125deg, #263c67, #3b9d91); }
+    .tag { padding:5px 9px; border-radius:3px; background:var(--white); color:var(--green); font-size:11px; font-weight:800; text-transform:uppercase; }
+    .event-body { padding:20px; }
+    .event h3 { margin:0 0 9px; font-size:19px; }
+    .event p { margin:0 0 17px; color:var(--muted); font-size:14px; }
+    .event-footer { display:flex; align-items:center; justify-content:space-between; color:var(--green); font-size:13px; font-weight:800; }
+    .how { background:#eaf3ef; }
+    .steps { display:grid; grid-template-columns:repeat(3, 1fr); gap:32px; }
+    .step-number { display:grid; width:42px; height:42px; place-items:center; margin-bottom:17px; border-radius:50%; background:var(--coral); color:#fff; font-weight:800; }
+    .step:nth-child(2) .step-number { background:var(--green); }.step:nth-child(3) .step-number { background:#d2a32b; }
+    .step h3 { margin:0 0 7px; font-size:19px; }.step p { margin:0; color:var(--muted); }
+    .cta { padding:64px 0; background:var(--ink); color:#fff; }
+    .cta-inner { display:flex; align-items:center; justify-content:space-between; gap:28px; }.cta h2 { max-width:600px; }.cta p { color:#bcd1cf; margin:10px 0 0; }
+    footer { padding:30px 0; color:#647b86; font-size:13px; }.footer-inner { display:flex; justify-content:space-between; gap:15px; }
+    dialog { width:min(470px, calc(100% - 32px)); padding:0; border:0; border-radius:7px; box-shadow:0 20px 70px rgba(0,0,0,.3); } dialog::backdrop { background:rgba(7,35,40,.65); }
+    .modal { padding:30px; }.modal-top { display:flex; justify-content:space-between; align-items:start; gap:20px; }.modal h2 { font-size:25px; }.close { padding:0; border:0; background:transparent; color:var(--muted); font-size:26px; line-height:1; }
+    label { display:block; margin-top:20px; color:#365365; font-size:13px; font-weight:800; } input { width:100%; margin-top:6px; padding:12px; border:1px solid var(--line); border-radius:4px; color:var(--ink); font:inherit; }
+    .modal .button { width:100%; margin-top:24px; }.notice { display:none; margin:16px 0 0; color:var(--green); font-weight:700; }
+    @media (max-width:700px) { .nav { height:64px; }.links { display:none; }.hero-content { padding:78px 0 88px; }.metrics, .events, .steps { grid-template-columns:1fr; }.metric { border-right:0; border-bottom:1px solid var(--line); }.metric:last-child { border:0; } section { padding:64px 0; }.section-head, .cta-inner, .footer-inner { align-items:start; flex-direction:column; }.event-image { height:170px; } }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <nav class="nav wrap" aria-label="Main navigation">
+      <a class="brand" href="#top" aria-label="Voteus home"><span class="mark" aria-hidden="true"></span>Voteus</a>
+      <div class="links"><a href="#events">Explore events</a><a href="#how">How it works</a><a href="#about">About us</a></div>
+      <div class="actions"><a class="button alt" href="nominees.html">Nominees</a><a class="button alt" href="vote.html">Cast a vote</a><a class="button" href="login.html">Log in</a></div>
+    </nav>
+    <div id="top" class="wrap hero-content">
+      <p class="eyebrow">Voting made clear</p>
+      <h1>Every voice deserves a fair count.</h1>
+      <p>Create a voting event, invite your audience, and follow every result with confidence. Voteus keeps the process simple from first ballot to final result.</p>
+      <div class="actions"><button class="button light" type="button" data-open>Start an event</button><a class="button alt" href="vote.html">Cast a vote</a></div>
+    </div>
+  </header>
+  <main>
+    <div class="wrap metrics" aria-label="Voteus statistics"><div class="metric"><strong>12,400+</strong><span>votes cast with Voteus</span></div><div class="metric"><strong>160</strong><span>events brought to life</span></div><div class="metric"><strong>99.9%</strong><span>secure vote processing</span></div></div>
+    <section id="events"><div class="wrap"><div class="section-head"><div><p class="eyebrow">On now</p><h2>Find an event to support</h2></div><p>From community awards to campus elections, there is always a voice worth backing.</p></div><div class="events"><article class="event"><div class="event-image"><span class="tag">Voting open</span></div><div class="event-body"><h3>Creative Impact Awards</h3><p>Celebrating ideas that make a difference in our communities.</p><div class="event-footer"><span>Ends 24 July</span><span>Vote now</span></div></div></article><article class="event"><div class="event-image"><span class="tag">Voting open</span></div><div class="event-body"><h3>Campus Choice 2026</h3><p>Help choose the next student leaders and representatives.</p><div class="event-footer"><span>Ends 30 July</span><span>Vote now</span></div></div></article><article class="event"><div class="event-image"><span class="tag">Voting open</span></div><div class="event-body"><h3>Local Business Favourites</h3><p>Your picks for the people and places that keep the city moving.</p><div class="event-footer"><span>Ends 2 August</span><span>Vote now</span></div></div></article></div></div></section>
+    <section id="how" class="how"><div class="wrap"><div class="section-head"><div><p class="eyebrow">Designed for people</p><h2>Set up in three clear steps</h2></div></div><div class="steps"><article class="step"><div class="step-number">01</div><h3>Create your event</h3><p>Name the event, add nominees, and decide exactly when voting begins and ends.</p></article><article class="step"><div class="step-number">02</div><h3>Share your vote link</h3><p>Invite your audience with a simple link that works beautifully on any device.</p></article><article class="step"><div class="step-number">03</div><h3>Watch results unfold</h3><p>Track participation and publish results when the moment is right.</p></article></div></div></section>
+    <section id="about" class="cta"><div class="wrap cta-inner"><div><h2>Make the next decision one everyone can trust.</h2><p>Launch your first Voteus event in minutes.</p></div><button class="button light" type="button" data-open>Create an event</button></div></section>
+  </main>
+  <footer><div class="wrap footer-inner"><span><strong>Voteus</strong> &copy; 2026</span><span>Clear voting for communities, teams, and events.</span></div></footer>
+  <dialog id="eventDialog"><form class="modal" method="dialog"><div class="modal-top"><div><p class="eyebrow">New event</p><h2>Create your Voteus event</h2></div><button class="close" value="cancel" aria-label="Close">&times;</button></div><label for="event-name">Event name<input id="event-name" name="event-name" placeholder="e.g. Community Choice Awards" required></label><label for="organizer-email">Email address<input id="organizer-email" name="organizer-email" type="email" placeholder="you@example.com" required></label><button class="button" id="submitEvent" type="submit">Continue</button><p class="notice" id="notice">Great start. Your event details are ready to continue.</p></form></dialog>
+  <script>
+    const dialog = document.querySelector('#eventDialog');
+    document.querySelectorAll('[data-open]').forEach((button) => button.addEventListener('click', () => dialog.showModal()));
+    document.querySelector('#eventDialog form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const notice = document.querySelector('#notice');
+      const response = await fetch('/api/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('voteusToken') || ''}` },
+        body: JSON.stringify({ name: document.querySelector('#event-name').value })
+      });
+      const result = await response.json();
+      notice.textContent = result.error || `"${result.event.name}" is ready to configure.`;
+      notice.style.display = 'block';
+      if (response.ok) window.setTimeout(() => { window.location.href = 'dashboard.html'; }, 450);
+    });
+  </script>
+</body>
+</html>

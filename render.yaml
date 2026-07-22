@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: voteus
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: VOTEUS_DATA_FILE
+        value: /var/data/voteus.json
+      - key: VOTEUS_UPLOADS_DIR
+        value: /var/data/uploads
+    disk:
+      name: voteus-data
+      mountPath: /var/data
+      sizeGB: 1
