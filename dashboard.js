@@ -183,6 +183,7 @@
   document.addEventListener('keydown', event => { if (event.key === 'Escape' && !deleteModal.hidden) closeDeleteModal(); });
   document.addEventListener('click', event => { const button = event.target.closest('.event .action.delete'); if (!button) return; event.preventDefault(); event.stopPropagation(); openDeleteModal({ id: button.closest('.event').dataset.eventId, name: button.closest('.event').dataset.eventName }); }, true);
   const sidebar = document.querySelector('#sidebar'); const scrim = document.querySelector('#scrim'); const menuToggle = document.querySelector('#menuToggle');
+  const campaignLink = document.createElement('a'); campaignLink.href = 'campaigns.html'; campaignLink.innerHTML = '<i data-lucide="megaphone"></i>Campaigns'; document.querySelector('.side-nav').append(campaignLink); window.lucide?.createIcons();
   function closeNavigation() { sidebar.classList.remove('is-open'); scrim.classList.remove('is-open'); menuToggle.setAttribute('aria-expanded', 'false'); }
   menuToggle.addEventListener('click', () => { const open = sidebar.classList.toggle('is-open'); scrim.classList.toggle('is-open', open); menuToggle.setAttribute('aria-expanded', String(open)); });
   scrim.addEventListener('click', closeNavigation);

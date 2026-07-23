@@ -73,6 +73,7 @@ function currentUser(req, data) {
 }
 function publicUser(user) { return { id: user.id, name: user.name, email: user.email }; }
 function publicEvent(event) { return { id: event.id, name: event.name, description: event.description || '', venue: event.venue || '', eventStartAt: event.eventStartAt || null, eventEndAt: event.eventEndAt || null, imageUrl: event.imageUrl || null, startAt: event.startAt || null, endAt: event.endAt || null, createdAt: event.createdAt }; }
+function publicCampaign(campaign) { return { id: campaign.id, title: campaign.title, description: campaign.description, destinationUrl: campaign.destinationUrl || '', ownerName: campaign.ownerName, createdAt: campaign.createdAt }; }
 function makeNomineeCode(event) {
   const usedCodes = new Set((event.nominees || []).map(nominee => nominee.code));
   let code;
@@ -274,6 +275,32 @@ async function api(req, res, url) {
     resetTokens.delete(text(token));
     for (const [sessionToken, userId] of sessions) if (userId === user.id) sessions.delete(sessionToken);
     return send(res, 200, { message: 'Your password has been updated. Please log in.' });
+  }
+  if (req.method === 'GET' && url.pathname === '/api/campaigns') {
+    return send(res, 200, { campaigns: (data.campaigns || []).filter(campaign => campaign.status === 'published').slice().reverse().map(publicCampaign) });
+  }
+  if (req.method === 'GET' && url.pathname === '/api/campaigns/mine') {
+    const user = requireUser(req, res, data);
+    return user && send(res, 200, { campaigns: (data.campaigns || []).filter(campaign => campaign.ownerId === user.id).slice().reverse().map(publicCampaign) });
+  }
+  if (req.method === 'POST' && url.pathname === '/api/campaigns') {
+    const user = requireUser(req, res, data);
+    if (!user) return;
+    const { title = '', description = '', destinationUrl = '' } = await readJson(req);
+    const normalizedTitle = text(title); const normalizedDescription = text(description); const normalizedUrl = text(destinationUrl);
+    if (normalizedTitle.length < 3 || normalizedTitle.length > 120) return send(res, 400, { error: 'Campaign title must be between 3 and 120 characters.' });
+    if (normalizedDescription.length < 10 || normalizedDescription.length > 1_200) return send(res, 400, { error: 'Campaign description must be between 10 and 1,200 characters.' });
+    if (normalizedUrl && !/^https?:\/\/.+/i.test(normalizedUrl)) return send(res, 400, { error: 'Campaign link must start with http:// or https://.' });
+    const campaign = { id: makeId(), ownerId: user.id, ownerName: user.name, title: normalizedTitle, description: normalizedDescription, destinationUrl: normalizedUrl, status: 'published', createdAt: new Date().toISOString() };
+    if (!Array.isArray(data.campaigns)) data.campaigns = [];
+    data.campaigns.push(campaign); writeData(data);
+    return send(res, 201, { campaign: publicCampaign(campaign) });
+  }
+  const campaignMatch = url.pathname.match(/^\/api\/campaigns\/([0-9a-f-]+)$/i);
+  if (campaignMatch) {
+    const campaign = (data.campaigns || []).find(item => item.id === campaignMatch[1] && item.status === 'published');
+    if (!campaign) return send(res, 404, { error: 'Campaign not found.' });
+    return send(res, 200, { campaign: publicCampaign(campaign) });
   }
   if (req.method === 'POST' && url.pathname === '/api/events') {
     const user = requireUser(req, res, data);
