@@ -108,6 +108,24 @@ function saveEventImage(imageData, eventId) {
   fs.writeFileSync(path.join(folder, `${eventId}.${extension}`), image);
   return relativePath;
 }
+async function sendNomineeInvitation({ event, nominee, appUrl }) {
+  const apiKey = text(process.env.SENDGRID_API_KEY);
+  const from = text(process.env.SENDGRID_FROM_EMAIL);
+  if (!apiKey || !from) throw new Error('SendGrid is not configured. Add SENDGRID_API_KEY and SENDGRID_FROM_EMAIL to the service environment.');
+  const voteUrl = `${appUrl}/vote.html?event=${encodeURIComponent(event.id)}`;
+  const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      personalizations: [{ to: [{ email: nominee.email }] }],
+      from: { email: from, name: 'Voteus' },
+      subject: `You have been added as a nominee for ${event.name}`,
+      content: [{ type: 'text/html', value: `<p>Hello ${nominee.name},</p><p>You have been added as a nominee for <strong>${event.name}</strong>.</p><p>Your nominee code is <strong>${nominee.code}</strong>.</p><p><a href="${voteUrl}">View the event and vote</a></p>` }]
+    })
+  });
+  if (!response.ok) throw new Error(`SendGrid could not send the invitation (${response.status}).`);
+  return voteUrl;
+}
 function managedEvent(event) {
   return {
     ...publicEvent(event), updatedAt: event.updatedAt,
@@ -414,13 +432,20 @@ async function api(req, res, url) {
     event.categories = Array.isArray(event.categories) ? event.categories : [];
     event.nominees = Array.isArray(event.nominees) ? event.nominees : [];
     if (req.method === 'POST' && !nomineeMatch[2]) {
-      const { name = '', categoryId = '', imageData = '' } = await readJson(req); const normalizedName = text(name);
+      const { name = '', email = '', categoryId = '', imageData = '' } = await readJson(req); const normalizedName = text(name); const normalizedEmail = text(email).toLowerCase();
       if (normalizedName.length < 2) return send(res, 400, { error: 'Nominee names need at least 2 characters.' });
+      if (!validEmail(normalizedEmail)) return send(res, 400, { error: 'Enter a valid nominee email address.' });
       if (!event.categories.some(category => category.id === text(categoryId))) return send(res, 400, { error: 'Choose a valid category for this nominee.' });
       const nomineeId = makeId();
-      const nominee = { id: nomineeId, name: normalizedName, code: makeNomineeCode(event), categoryId: text(categoryId), photoUrl: saveNomineeImage(imageData, nomineeId) };
+      const nominee = { id: nomineeId, name: normalizedName, email: normalizedEmail, code: makeNomineeCode(event), categoryId: text(categoryId), photoUrl: saveNomineeImage(imageData, nomineeId), invitation: { status: 'pending' } };
       event.nominees.push(nominee); event.updatedAt = new Date().toISOString(); writeData(data);
-      return send(res, 201, { nominee });
+      try {
+        const forwardedProto = text((req.headers['x-forwarded-proto'] || '').split(',')[0]) || 'http';
+        const appUrl = text(process.env.PUBLIC_APP_URL).replace(/\/+$/, '') || `${forwardedProto}://${req.headers.host}`;
+        nominee.invitation = { status: 'sent', sentAt: new Date().toISOString(), voteUrl: await sendNomineeInvitation({ event, nominee, appUrl }) };
+      } catch (error) { nominee.invitation = { status: 'failed', error: error.message }; }
+      writeData(data);
+      return send(res, 201, { nominee, invitation: nominee.invitation });
     }
     const nominee = event.nominees.find(item => item.id === nomineeMatch[2]);
     if (!nominee) return send(res, 404, { error: 'Nominee not found.' });
