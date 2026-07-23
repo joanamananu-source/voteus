@@ -26,7 +26,7 @@
     const fields = new FormData(form);
     const endpoint = kind === 'register' ? '/api/auth/register' : kind === 'login' ? '/api/auth/login' : resetToken ? '/api/auth/password-reset/confirm' : '/api/auth/password-reset';
     const payload = resetToken ? { token: resetToken, password: String(fields.get('password') || '') } : { email: String(fields.get('email') || '').trim() };
-    if (kind === 'register') payload.name = String(fields.get('name') || '').trim();
+    if (kind === 'register') { payload.name = String(fields.get('name') || '').trim(); payload.termsAccepted = fields.get('terms') === 'on'; }
     if (kind !== 'recovery') payload.password = String(fields.get('password') || '');
 
     submit.disabled = true;

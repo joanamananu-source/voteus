@@ -184,13 +184,14 @@ async function api(req, res, url) {
   const data = readData();
   if (req.method === 'GET' && url.pathname === '/api/health') return send(res, 200, { status: 'ok' });
   if (req.method === 'POST' && url.pathname === '/api/auth/register') {
-    const { name = '', email = '', password = '' } = await readJson(req);
+    const { name = '', email = '', password = '', termsAccepted = false } = await readJson(req);
     const normalizedName = text(name);
     const normalizedEmail = text(email).toLowerCase();
     if (normalizedName.length < 2 || !validEmail(normalizedEmail) || typeof password !== 'string' || password.length < 8) return send(res, 400, { error: 'Enter a name, a valid email, and a password of at least 8 characters.' });
+    if (!termsAccepted) return send(res, 400, { error: 'Accept the Terms & Conditions to create an account.' });
     if (data.users.some(user => user.email === normalizedEmail)) return send(res, 409, { error: 'An account already exists for this email.' });
     const passwordData = hashPassword(password);
-    const user = { id: makeId(), name: normalizedName, email: normalizedEmail, ...passwordData, createdAt: new Date().toISOString() };
+    const user = { id: makeId(), name: normalizedName, email: normalizedEmail, termsAcceptedAt: new Date().toISOString(), termsVersion: '2026-07-23', ...passwordData, createdAt: new Date().toISOString() };
     data.users.push(user); writeData(data);
     const token = makeId(); sessions.set(token, user.id);
     return send(res, 201, { token, user: publicUser(user) });
