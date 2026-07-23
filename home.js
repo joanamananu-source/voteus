@@ -1,1 +1,29 @@
-(() => { const ticketLink = document.createElement('a'); ticketLink.className = 'button'; ticketLink.href = 'tickets.html'; ticketLink.textContent = 'Buy tickets'; document.querySelector('.links').prepend(ticketLink); const list = document.querySelector('#campaignList'); const truncate = value => value.length > 150 ? `${value.slice(0, 147)}…` : value; fetch('/api/campaigns').then(response => response.json()).then(({ campaigns = [] }) => { list.replaceChildren(); if (!campaigns.length) { list.innerHTML = '<p class="empty">No campaigns have been published yet. Be the first to create one.</p>'; return; } campaigns.forEach(campaign => { const card = document.createElement('a'); card.className = 'campaign'; card.href = `campaign.html?id=${encodeURIComponent(campaign.id)}`; card.innerHTML = '<span class="campaign-tag">Community campaign</span><h3></h3><p></p><footer>View campaign →</footer>'; card.querySelector('h3').textContent = campaign.title; card.querySelector('p').textContent = truncate(campaign.description); list.append(card); }); }).catch(() => { list.innerHTML = '<p class="empty">Campaigns are unavailable right now. Please try again shortly.</p>'; }); })();
+(() => {
+  const ticketLink = document.createElement('a');
+  ticketLink.className = 'button';
+  ticketLink.href = 'tickets.html';
+  ticketLink.textContent = 'Buy tickets';
+  document.querySelector('.links').prepend(ticketLink);
+
+  const list = document.querySelector('#campaignList');
+  const truncate = value => value.length > 150 ? `${value.slice(0, 147)}...` : value;
+  fetch('/api/campaigns')
+    .then(response => response.json())
+    .then(({ campaigns = [] }) => {
+      list.replaceChildren();
+      if (!campaigns.length) {
+        list.innerHTML = '<p class="empty">No campaigns have been published yet. Check back soon.</p>';
+        return;
+      }
+      campaigns.forEach(campaign => {
+        const card = document.createElement('a');
+        card.className = 'campaign';
+        card.href = `campaign.html?id=${encodeURIComponent(campaign.id)}`;
+        card.innerHTML = '<span class="campaign-tag">Community campaign</span><h3></h3><p></p><footer>View campaign &rarr;</footer>';
+        card.querySelector('h3').textContent = campaign.title;
+        card.querySelector('p').textContent = truncate(campaign.description);
+        list.append(card);
+      });
+    })
+    .catch(() => { list.innerHTML = '<p class="empty">Campaigns are unavailable right now. Please try again shortly.</p>'; });
+})();
