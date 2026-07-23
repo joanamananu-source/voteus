@@ -347,6 +347,23 @@ async function api(req, res, url) {
     return send(res, 201, { message: `${voteQuantity} vote${voteQuantity === 1 ? '' : 's'} recorded.`, votes: votes.map(vote => ({ id: vote.id, nomineeCode: nominee.code, payment: vote.payment })), payment: requiredPayment.enabled ? { reference: paymentReference, total: Number((requiredPayment.amount * voteQuantity).toFixed(2)), currency: requiredPayment.currency, method: text(payment.method || 'mobile-money') } : null });
   }
   const manageMatch = url.pathname.match(/^\/api\/events\/([0-9a-f-]+)\/manage$/i);
+  const rankingsMatch = url.pathname.match(/^\/api\/events\/([0-9a-f-]+)\/rankings$/i);
+  if (rankingsMatch && req.method === 'GET') {
+    const user = requireUser(req, res, data);
+    if (!user) return;
+    const event = data.events.find(item => item.id === rankingsMatch[1]);
+    if (!event) return send(res, 404, { error: 'Event not found.' });
+    if (event.ownerId !== user.id) return send(res, 403, { error: 'Only the event owner can view rankings.' });
+    const votes = Array.isArray(data.votes) ? data.votes.filter(vote => vote.eventId === event.id) : [];
+    const categories = Array.isArray(event.categories) ? event.categories : [];
+    const nominees = (event.nominees || []).map(nominee => ({
+      id: nominee.id, name: nominee.name, code: nominee.code || '', photoUrl: nominee.photoUrl || null,
+      categoryId: nominee.categoryId, votes: votes.filter(vote => vote.nomineeId === nominee.id).length
+    })).sort((a, b) => b.votes - a.votes || a.name.localeCompare(b.name));
+    const positions = new Map();
+    nominees.forEach(nominee => { const position = (positions.get(nominee.categoryId) || 0) + 1; positions.set(nominee.categoryId, position); nominee.position = position; });
+    return send(res, 200, { event: publicEvent(event), nominees: nominees.map(nominee => ({ ...nominee, categoryName: categories.find(category => category.id === nominee.categoryId)?.name || 'Uncategorised' })) });
+  }
   if (manageMatch && req.method === 'GET') {
     const user = requireUser(req, res, data);
     if (!user) return;

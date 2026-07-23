@@ -85,7 +85,8 @@
     rename.addEventListener('click', async () => { const name = window.prompt('New event name', event.name); if (!name || name === event.name) return; try { await request(`/api/events/${event.id}`, { method: 'PATCH', body: JSON.stringify({ name }) }); await loadEvents(); } catch (error) { showNotice(error.message, true); } });
     const remove = document.createElement('button'); remove.className = 'action delete'; remove.type = 'button'; remove.textContent = 'Delete';
     remove.addEventListener('click', async () => { if (!window.confirm(`Delete “${event.name}”? This cannot be undone.`)) return; try { await request(`/api/events/${event.id}`, { method: 'DELETE' }); await loadEvents(); } catch (error) { showNotice(error.message, true); } });
-    actions.append(manage, rename, remove); card.append(info, actions); window.lucide?.createIcons(); return card;
+    const rankings = document.createElement('a'); rankings.className = 'action'; rankings.href = `rankings.html?event=${encodeURIComponent(event.id)}`; rankings.innerHTML = '<i data-lucide="trophy"></i>Rankings';
+    actions.append(manage, rankings, rename, remove); card.append(info, actions); window.lucide?.createIcons(); return card;
   }
   function listItem(name, detail, onDelete) {
     const item = document.createElement('li');
